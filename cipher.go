@@ -1,8 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 const START_UPPER = 65
@@ -11,39 +15,72 @@ const END_UPPER = 90
 const END_LOWER = 122
 
 func main() {
-	fmt.Println("Ceasar Cipher Decoder and Encoder")
-	fmt.Println("Choose operation")
-	fmt.Println("1) Encode string")
-	fmt.Println("2) Decode string")
-
-	var choice int32
-	for {
-		fmt.Print("Choice: ")
-		fmt.Scanln(&choice)
-		if choice == 1 || choice == 2 {
-			break
-		}
+	operationPrompt := promptui.Select{
+		Label: "Choose operation",
+		Items: []string{"Encode", "Decode"},
 	}
-	
-	var data string
-	var shift int = 4
-	if choice == 1 {
-		fmt.Print("Enter shift: ")
-		fmt.Scanln(&shift)
-		fmt.Print("Enter string to encode: ")
-		fmt.Scanln(&data)
 
-		encoded := encode(data, shift)
+	_, result, _ := operationPrompt.Run()
+	
+	shift, _ := promptShift()
+	marks, _ := strconv.Atoi(shift)
+	
+	if result == "Encode" {
+		data := promptData()
+		encoded := encode(data, marks)
 		fmt.Println(encoded)
-	} else if choice == 2 {
-		fmt.Print("Enter shift: ")
-		fmt.Scanln(&shift)
-		fmt.Print("Enter string to decode: ")
-		fmt.Scanln(&data)
-		
-		decoded := decode(data, shift)
+	} else if result == "Decode" {
+		data := promptData()
+		decoded := decode(data, marks)
 		fmt.Println(decoded)
 	}
+}
+
+func promptData() string {
+	validate := func(input string) error {
+		lettersOnly := isLettersOnly(input)
+		empty := len(input) <= 0
+		if !lettersOnly {
+			return errors.New("only letters are allowed")
+		}
+		if empty {
+			return errors.New("empty string is not allowed")
+		}
+		return nil
+	}
+
+	// var data string
+	dataPrompt := promptui.Prompt{
+		Label: "Enter data string: ",
+		Validate: validate,
+	}
+	data, _ := dataPrompt.Run()
+
+	return data
+}
+
+func promptShift() (string, error){
+	validate := func(input string) error {
+		_, err := strconv.ParseInt(input, 10, 32)
+		if err != nil {
+			return errors.New("invalid number")
+		}
+		return nil
+	}
+
+	var result string
+	shiftPrompt := promptui.Prompt{
+		Label: "Numeric Shift: ",
+		Validate: validate,
+	}
+
+	result, err := shiftPrompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	shift := result
+	return shift, nil
 }
 
 func decode(data string, shift int) string {
@@ -93,6 +130,3 @@ func encode(data string, shift int) string {
 	return encoded.String()
 }
 
-func isLowerCase(ascii int) bool {
-	return ascii >= START_LOWER && ascii <= END_LOWER 	
-}
