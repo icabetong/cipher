@@ -1,5 +1,7 @@
 # cipher
 
+Simple console application to encode and decode strings/data to various ciphers such as Ceaser and Vigenère.
+
 ## Built with
 
 - Go
