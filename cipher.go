@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt" 
+	"fmt"
 	"strings"
 )
 
@@ -63,7 +63,7 @@ func decode(data string, shift int) string {
 			}
 		}
 
-		var char = string(num)
+		var char = string(rune(num))
 		decoded.WriteString(char)
 	}
 
@@ -86,7 +86,7 @@ func encode(data string, shift int) string {
 			}
 		}
 		
-		var char = string(num)
+		var char = string(rune(num))
 		encoded.WriteString(char)
 	}
 
